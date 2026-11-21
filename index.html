@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sendtoher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fdf0f5;--card:#ffffff;--line:#f3e4ea;--ink:#1f1f22;--mute:#8b8b92;--faint:#c9c9ce;
+  --pink:#e98fa5;--pink-hover:#e27f98;--pink-soft:#fdeff3;--dash:#f5d6e0;--off:#ededee;--off-ink:#a9a9ae;
+  color-scheme:light}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:300 16px/1.5 Inter,"Noto Sans Thai","Segoe UI",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:1070px;margin:0 auto;padding:140px 20px 80px}
+h1{margin:0;text-align:center;font-weight:500;font-size:44px;letter-spacing:-.03em;line-height:1.1}
+.sub{margin:10px 0 0;text-align:center;color:var(--mute);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:56px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:30px}
+.card h2{margin:0 0 28px;font-size:21px;font-weight:500;letter-spacing:-.01em}
+.hidden{display:none!important}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* send */
+.drop{display:grid;place-items:center;align-content:center;gap:4px;height:306px;border:1px dashed var(--dash);border-radius:16px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.drop:hover,.drop.over{background:var(--pink-soft);border-color:var(--pink)}
+.drop .i{color:var(--pink);margin-bottom:22px;width:28px;height:28px}
+.drop b{font-weight:500;font-size:17px}
+.drop span{color:var(--mute)}
+.sum{display:flex;justify-content:space-between;margin:22px 4px 8px;font-size:16px}
+.sum b{font-weight:500}.sum span{color:var(--mute)}
+ul.files{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+ul.files li{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:12px 16px}
+.ficon{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--pink-soft);color:#f2b8c7}
+.ficon .i{width:20px;height:20px}
+.fmeta{flex:1;overflow:hidden}
+.fname{font-weight:400;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsize{color:var(--mute);font-size:13px}
+.x,.dl{flex:none;display:grid;place-items:center;width:34px;height:34px;border:0;border-radius:8px;background:none;color:var(--mute);cursor:pointer;text-decoration:none}
+.x:hover,.dl:hover{background:var(--pink-soft);color:var(--ink)}
+.x .i,.dl .i{width:18px;height:18px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:55px;margin-top:25px;border:0;border-radius:12px;background:var(--pink);color:#fff;font:inherit;font-weight:500;font-size:17px;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--pink-hover)}
+.btn:disabled{background:var(--off);color:var(--off-ink);cursor:default}
+.btn .i{width:20px;height:20px}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);font-weight:400;margin-top:10px}
+.btn.ghost:hover{background:var(--pink-soft)}
+.box{border:1px solid var(--line);border-radius:16px;padding:40px 24px;text-align:center}
+.box .label{color:var(--mute)}
+.bar{height:6px;border-radius:9px;background:var(--pink-soft);overflow:hidden;margin:22px 0 12px}
+.bar div{height:100%;width:0;background:var(--pink);transition:width .2s}
+.meta{display:flex;justify-content:space-between;color:var(--mute);font-size:14px;font-variant-numeric:tabular-nums}
+.code{margin:14px 0 10px;font-size:56px;font-weight:300;letter-spacing:.32em;padding-left:.32em;font-variant-numeric:tabular-nums;line-height:1.1}
+.status{margin-top:16px;font-size:14px;color:var(--mute)}
+.status.ok{color:#c2557a}
+.err{min-height:1.4em;margin:12px 0 0;text-align:center;color:#c94060;font-size:14px}
+.keyin{width:100%;margin-top:12px;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--ink)}
+
+/* receive */
+.rbox{border:1px solid var(--line);border-radius:16px;padding:40px 24px 40px;text-align:center}
+.rbox .i{color:#6b6b72;width:32px;height:32px}
+.rbox p{margin:14px 0 22px;font-weight:500;font-size:17px}
+#pin{width:200px;max-width:100%;height:72px;border:1px solid var(--line);border-radius:12px;text-align:center;font:300 28px Inter,system-ui,sans-serif;letter-spacing:.42em;padding-left:.42em;color:var(--ink);background:#fff}
+#pin::placeholder{color:#d3d3d8}
+#pin:focus{outline:none;border-color:var(--pink)}
+#recv-files{margin-top:16px}
+.exp{margin:12px 4px 0;color:var(--mute);font-size:14px}
+button:focus-visible,.drop:focus-visible,a:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+
+@media(max-width:760px){
+  main{padding-top:64px}
+  h1{font-size:36px}
+  .grid{grid-template-columns:minmax(0,1fr);margin-top:36px}
+  .card{padding:22px}
+  .drop{height:220px}
+  .code{font-size:46px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.linkbtn{display:block;margin:14px auto 0;border:0;background:none;color:var(--mute);font:inherit;font-size:14px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--dash);text-underline-offset:3px}
+.linkbtn:hover{color:var(--ink)}
+.prog{margin-top:16px}
+.prog .bar{margin:0 0 10px}
+.via{display:inline-flex;align-items:center;gap:6px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--pink)}
+.fsize.ok{color:#c2557a}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 13v8"/><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="m8 17 4-4 4 4"/></symbol>
+  <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+</svg>
+
+<main>
+  <h1>sendtoher</h1>
+  <p class="sub">S</p>
+
+  <div class="grid">
+    <!-- SEND -->
+    <section class="card">
+      <h2>Send</h2>
+
+      <div id="send-pick">
+        <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files">
+          <svg class="i"><use href="#i-up"/></svg>
+          <b>Drop files here</b>
+          <span>or click to browse</span>
+        </div>
+        <input id="picker" type="file" multiple hidden>
+        <div id="pick-wrap" class="hidden">
+          <div class="sum"><b id="pick-count"></b><span id="pick-total"></span></div>
+          <ul id="pick-list" class="files"></ul>
+          <input id="sitekey" class="keyin hidden" type="password" placeholder="Sender key" autocomplete="current-password">
+          <button id="send-btn" class="btn"><svg class="i"><use href="#i-send"/></svg>Send Files</button>
+          <button id="link-btn" class="linkbtn">or upload as a link she can get later</button>
+        </div>
+        <p id="send-err" class="err"></p>
+      </div>
+
+      <div id="send-up" class="hidden">
+        <div class="box">
+          <div class="label">Uploading</div>
+          <div class="bar"><div id="up-bar"></div></div>
+          <div class="meta"><span id="up-txt">0%</span><span id="up-speed"></span></div>
+        </div>
+        <button id="up-cancel" class="btn ghost">Cancel</button>
+      </div>
+
+      <div id="send-pin" class="hidden">
+        <div class="box">
+          <div class="label">Your code</div>
+          <div id="pin-show" class="code"></div>
+          <div id="pin-exp" class="label">Expires in <span id="pin-timer">--:--</span></div>
+          <div id="s-prog" class="prog hidden">
+            <div class="bar"><div id="s-bar"></div></div>
+            <div class="meta"><span id="s-txt"></span><span id="s-speed"></span></div>
+          </div>
+          <div id="pin-status" class="status"></div>
+        </div>
+        <button id="copy-link" class="btn ghost">Copy link</button>
+        <button id="pin-cancel" class="btn ghost">Cancel</button>
+        <button id="pin-new" class="btn">Send more</button>
+      </div>
+    </section>
+
+    <!-- RECEIVE -->
+    <section class="card">
+      <h2>Receive</h2>
+      <div class="rbox">
+        <svg class="i"><use href="#i-inbox"/></svg>
+        <p>Enter the 4-digit code</p>
+        <input id="pin" inputmode="numeric" maxlength="4" placeholder="0000" autocomplete="off" aria-label="4-digit code">
+      </div>
+      <div id="recv-files" class="hidden">
+        <ul id="recv-list" class="files" style="margin-top:16px"></ul>
+        <div id="r-prog" class="prog hidden">
+          <div class="bar"><div id="r-bar"></div></div>
+          <div class="meta"><span id="r-txt"></span><span id="r-speed"></span></div>
+        </div>
+        <div id="recv-exp" class="exp"></div>
+      </div>
+      <button id="recv-btn" class="btn" disabled>Receive</button>
+      <p id="recv-err" class="err"></p>
+    </section>
+  </div>
+</main>
+
+<script>
+{
+const TTL_MIN = 10;              // code lifetime in minutes
+const ONE_TIME = true;           // link mode: delete files once everything has been downloaded
+const P2P_TIMEOUT = 10000;       // wait this long for a direct connection before switching to the server relay
+const MAX_CHUNK = 256 * 1024, READ = 8 * 1024 * 1024, HIGH = 8 * 1024 * 1024, LOW = 2 * 1024 * 1024;
+const throttle = (fn, ms = 200) => { let last = 0; return (...a) => { const t = performance.now(); if (t - last >= ms) { last = t; fn(...a); } }; };
+const MEM_LIMIT = 1.5 * 1024 ** 3; // files bigger than this go through the relay unless the browser can write to disk
+
+const $ = s => document.querySelector(s);
+const show = (id, on) => $(id).classList.toggle('hidden', !on);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = b => { if (b < 1024) return b + ' B'; const u = ['KB','MB','GB','TB']; let i = -1; do { b /= 1024; i++; } while (b >= 1024 && i < 3); return b.toFixed(1) + ' ' + u[i]; };
+const mmss = ms => { const t = Math.max(0, Math.ceil(ms / 1000)); const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60; return (h ? h + ':' + String(m).padStart(2,'0') : m) + ':' + String(s).padStart(2,'0'); };
+const store = { get(k){ try { return localStorage.getItem(k) || ''; } catch { return ''; } }, set(k,v){ try { localStorage.setItem(k,v); } catch {} } };
+const icon = n => `<svg class="i"><use href="#i-${n}"/></svg>`;
+const hex = n => [...crypto.getRandomValues(new Uint8Array(n))].map(b => b.toString(16).padStart(2, '0')).join('');
+const sum = a => a.reduce((x, f) => x + f.size, 0);
+const fileRow = (f, right) => `<li><span class="ficon">${icon('file')}</span><div class="fmeta"><div class="fname">${esc(f.name)}</div><div class="fsize">${fmt(f.size)}</div></div>${right}</li>`;
+
+async function api(method, url, body, extra = {}) {
+  const headers = { ...extra };
+  if (body) headers['Content-Type'] = 'application/json';
+  const r = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  let data = {}; try { data = await r.json(); } catch {}
+  return { ok: r.ok, status: r.status, data };
+}
+
+// speed meter
+function meter() {
+  let t0 = performance.now(), b0 = 0, rate = 0;
+  return bytes => {
+    const t = performance.now();
+    if (t - t0 > 700) { const r = (bytes - b0) / ((t - t0) / 1000); rate = rate ? rate * 0.6 + r * 0.4 : r; t0 = t; b0 = bytes; }
+    return rate;
+  };
+}
+function setProg(prefix, done, total, label, rate) {
+  const p = total ? Math.min(1, done / total) : 1;
+  $(`#${prefix}-bar`).style.width = (p * 100).toFixed(1) + '%';
+  $(`#${prefix}-txt`).innerHTML = `<span class="via"><span class="dot"></span>${label}</span> · ${Math.floor(p * 100)}%`;
+  $(`#${prefix}-speed`).textContent = rate ? fmt(rate) + '/s' : '';
+}
+
+/* ======================= SEND ======================= */
+let picked = [], sess = null, xhr = null, timer = null, poll = null, offset = 0;
+let es = null, pc = null, dc = null, pending = [], sendQ = Promise.resolve(), finished = false;
+let sentBytes = 0, relayLoaded = new Map(), relayDoneBytes = 0, sMeter = null, sVia = '';
+
+const drop = $('#drop'), picker = $('#picker');
+drop.onclick = () => picker.click();
+drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); picker.click(); } };
+picker.onchange = () => { addFiles(picker.files); picker.value = ''; };
+['dragenter','dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { e.preventDefault(); if (!sess) addFiles(e.dataTransfer.files); });
+
+function addFiles(list) { for (const f of list) picked.push(f); renderPick(); }
+function renderPick() {
+  show('#pick-wrap', picked.length > 0);
+  $('#pick-count').textContent = picked.length === 1 ? '1 file' : `${picked.length} files`;
+  $('#pick-total').textContent = `${fmt(sum(picked))} total`;
+  $('#pick-list').innerHTML = picked.map((f, i) => fileRow(f, `<button class="x" data-i="${i}" aria-label="Remove">${icon('x')}</button>`)).join('');
+  $('#send-btn').disabled = $('#link-btn').disabled = !picked.length;
+  $('#send-err').textContent = '';
+}
+$('#pick-list').onclick = e => { const b = e.target.closest('.x'); if (b) { picked.splice(+b.dataset.i, 1); renderPick(); } };
+if (store.get('pinsend-key')) $('#sitekey').value = store.get('pinsend-key');
+
+async function start(url, body) {
+  $('#send-err').textContent = '';
+  $('#send-btn').disabled = $('#link-btn').disabled = true;
+  const key = $('#sitekey').value.trim();
+  let r;
+  try { r = await api('POST', url, body, key ? { 'X-Site-Key': key } : {}); }
+  catch { renderPick(); $('#send-err').textContent = 'Can’t reach the server'; return null; }
+  if (r.status === 401) { show('#sitekey', true); $('#sitekey').focus(); renderPick(); $('#send-err').textContent = key ? 'Wrong sender key' : 'Enter the sender key'; return null; }
+  if (!r.ok) { renderPick(); $('#send-err').textContent = r.status === 503 ? 'Server is busy, try again' : 'Couldn’t start sending'; return null; }
+  if (key) store.set('pinsend-key', key);
+  return r.data;
+}
+
+/* ---- direct (P2P with relay fallback) ---- */
+$('#send-btn').onclick = async () => {
+  const d = await start('/api/direct', { ttl: TTL_MIN, files: picked.map(f => ({ name: f.name, size: f.size })) });
+  if (!d) return;
+  sess = { kind: 'direct', pin: d.pin, token: d.token, ice: d.ice, ready: true, expiresAt: d.expiresAt };
+  offset = d.now - Date.now(); finished = false;
+  showPin('Keep this page open until she receives');
+  es = new EventSource(`/api/direct/${sess.pin}/events?token=${sess.token}`);
+  es.addEventListener('peer', () => { stopTick(); $('#pin-exp').textContent = 'She’s here'; status('Connecting…'); startPeer().catch(console.error); });
+  es.addEventListener('peer-left', () => { closePeer(); if (!finished) { status('She left · waiting for her…'); $('#pin-exp').textContent = 'Waiting'; show('#s-prog', false); } });
+  es.addEventListener('signal', e => onSenderSignal(JSON.parse(e.data)).catch(console.error));
+  es.addEventListener('pull', e => relayUpload(JSON.parse(e.data)));
+  es.addEventListener('gone', e => { const r = JSON.parse(e.data).reason; if (!finished) status(r === 'expired' ? 'Code expired' : 'Session ended'); endSession(false); });
+};
+const signal = data => fetch(`/api/direct/${sess.pin}/signal`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Token': sess.token }, body: JSON.stringify({ data }) }).catch(() => {});
+
+async function startPeer() {
+  closePeer();
+  sentBytes = 0; relayLoaded = new Map(); relayDoneBytes = 0; sMeter = meter(); sendQ = Promise.resolve();
+  pc = new RTCPeerConnection({ iceServers: sess.ice });
+  dc = pc.createDataChannel('file', { ordered: true });
+  dc.binaryType = 'arraybuffer'; dc.bufferedAmountLowThreshold = LOW;
+  pc.onicecandidate = e => { if (e.candidate) signal({ candidate: e.candidate.toJSON() }); };
+  dc.onopen = () => { sVia = 'Direct'; status('Connected directly'); };
+  dc.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'get') sendQ = sendQ.then(() => sendFile(m.i)).catch(err => { console.warn(err); if (!finished) status("Connection dropped — ask her to try again"); });
+  };
+  await pc.setLocalDescription(await pc.createOffer());
+  signal({ sdp: pc.localDescription.toJSON() });
+}
+async function onSenderSignal(d) {
+  if (d.type === 'relay-start') { sVia = 'Via server'; status('Sending through the server'); return; }
+  if (d.type === 'complete') return done();
+  if (!pc) return;
+  if (d.sdp) { await pc.setRemoteDescription(d.sdp); for (const c of pending.splice(0)) await pc.addIceCandidate(c).catch(() => {}); }
+  else if (d.candidate) { if (pc.remoteDescription) await pc.addIceCandidate(d.candidate).catch(() => {}); else pending.push(d.candidate); }
+}
+const waitLow = () => new Promise(r => { dc.onbufferedamountlow = () => { dc.onbufferedamountlow = null; r(); }; dc.onclose = r; });
+async function sendFile(i) {
+  const f = picked[i], ch = dc;
+  const max = pc && pc.sctp && pc.sctp.maxMessageSize;
+  const CHUNK = Math.max(16 * 1024, Math.min(MAX_CHUNK, max || 64 * 1024));
+  ch.send(JSON.stringify({ type: 'file', i, size: f.size }));
+  let next = f.slice(0, READ).arrayBuffer();          // read ahead while sending
+  for (let off = 0; off < f.size;) {
+    const buf = await next;
+    if (off + buf.byteLength < f.size) next = f.slice(off + buf.byteLength, off + buf.byteLength + READ).arrayBuffer();
+    for (let p = 0; p < buf.byteLength; p += CHUNK) {
+      if (ch.bufferedAmount > HIGH) await waitLow();
+      if (ch.readyState !== 'open') throw new Error('channel closed');
+      ch.send(new Uint8Array(buf, p, Math.min(CHUNK, buf.byteLength - p)));
+      sentBytes += Math.min(CHUNK, buf.byteLength - p);
+      senderProgress(sentBytes);
+    }
+    off += buf.byteLength;
+  }
+  ch.send(JSON.stringify({ type: 'eof', i }));
+}
+function relayUpload({ id, i }) {
+  sVia = 'Via server';
+  const x = new XMLHttpRequest();
+  x.open('PUT', `/api/direct/${sess.pin}/relay/${id}`);
+  x.setRequestHeader('X-Token', sess.token);
+  x.setRequestHeader('Content-Type', 'application/octet-stream');
+  x.upload.onprogress = e => { relayLoaded.set(id, e.loaded); senderProgress(relayDoneBytes + [...relayLoaded.values()].reduce((a, b) => a + b, 0)); };
+  x.onloadend = () => { if (x.status === 200) relayDoneBytes += picked[i].size; relayLoaded.delete(id); };
+  x.send(picked[i]);
+}
+const senderProgress = throttle(bytes => {
+  show('#s-prog', true);
+  setProg('s', bytes, sum(picked), sVia || 'Sending', sMeter ? sMeter(bytes) : 0);
+});
+function closePeer() { try { dc && dc.close(); } catch {} try { pc && pc.close(); } catch {} pc = dc = null; pending = []; }
+function done() {
+  finished = true;
+  setProg('s', 1, 1, sVia || 'Sent', 0); $('#s-speed').textContent = '';
+  status('Received ♥', true); $('#pin-exp').textContent = 'Done';
+  endSession(true);
+}
+function endSession(del) {
+  if (sess && sess.kind === 'direct' && del) api('DELETE', `/api/direct/${sess.pin}`, null, { 'X-Token': sess.token }).catch(() => {});
+  if (es) es.close(); es = null;
+  setTimeout(closePeer, 1500);
+  stopTick();
+  if (sess) sess.closed = true;
+}
+window.addEventListener('beforeunload', e => { if (sess && sess.kind === 'direct' && !sess.closed) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ---- link (upload & keep) ---- */
+$('#link-btn').onclick = async () => {
+  const d = await start('/api/send', { ttl: TTL_MIN, oneTime: ONE_TIME });
+  if (!d) return;
+  const total = sum(picked);
+  if (total > d.maxBytes) { api('DELETE', `/api/send/${d.pin}`, null, { 'X-Token': d.token }); renderPick(); $('#send-err').textContent = `Too large — limit is ${fmt(d.maxBytes)}`; return; }
+  sess = { kind: 'store', pin: d.pin, token: d.token, ready: false };
+  show('#send-pick', false); show('#send-up', true);
+  try {
+    let doneB = 0; const t0 = performance.now();
+    for (const f of picked) {
+      await upload(f, loaded => {
+        const p = total ? (doneB + loaded) / total : 1;
+        $('#up-bar').style.width = (p * 100).toFixed(1) + '%';
+        $('#up-txt').textContent = `${Math.floor(p * 100)}% · ${fmt(doneB + loaded)} of ${fmt(total)}`;
+        const sec = (performance.now() - t0) / 1000;
+        if (sec > 0.5) $('#up-speed').textContent = fmt((doneB + loaded) / sec) + '/s';
+      });
+      doneB += f.size;
+    }
+    const r = await api('POST', `/api/send/${sess.pin}/done`, null, { 'X-Token': sess.token });
+    if (!r.ok) throw new Error('done');
+    sess.ready = true; offset = r.data.now - Date.now(); sess.expiresAt = r.data.expiresAt;
+    showPin('Uploaded · she can use the code any time before it expires');
+    poll = setInterval(async () => {
+      try {
+        const s = await api('GET', `/api/send/${sess.pin}/status`, null, { 'X-Token': sess.token });
+        if (s.status === 404) { status('Received ♥ files deleted from server', true); $('#pin-exp').textContent = 'Done'; return stopTick(); }
+        if (s.ok && s.data.received) status(`Downloaded ${s.data.received} of ${s.data.total}`, true);
+      } catch {}
+    }, 3000);
+  } catch (e) {
+    if (sess) api('DELETE', `/api/send/${sess.pin}`, null, { 'X-Token': sess.token }).catch(() => {});
+    const m = e && e.message;
+    resetSend(m === 'cancel' ? '' : m === 'too_large' ? 'Too large for this server' : 'Upload failed, try again', m !== 'cancel' && m !== 'too_large');
+  }
+};
+function upload(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    xhr = new XMLHttpRequest();
+    xhr.open('PUT', `/api/send/${sess.pin}/files`);
+    xhr.setRequestHeader('X-Token', sess.token);
+    xhr.setRequestHeader('X-Filename', encodeURIComponent(file.name));
+    xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+    xhr.upload.onprogress = e => onProgress(e.loaded);
+    xhr.onload = () => xhr.status === 200 ? resolve() : reject(new Error(xhr.status === 413 ? 'too_large' : 'fail'));
+    xhr.onerror = () => reject(new Error('fail'));
+    xhr.onabort = () => reject(new Error('cancel'));
+    xhr.send(file);
+  });
+}
+$('#up-cancel').onclick = () => { if (xhr) xhr.abort(); };
+
+/* ---- shared sender UI ---- */
+function status(t, ok) { $('#pin-status').className = ok ? 'status ok' : 'status'; $('#pin-status').textContent = t; }
+function showPin(msg) {
+  show('#send-pick', false); show('#send-up', false); show('#send-pin', true); show('#s-prog', false);
+  $('#pin-show').textContent = sess.pin;
+  $('#pin-exp').innerHTML = 'Expires in <span id="pin-timer">--:--</span>';
+  status(msg);
+  const tick = () => {
+    const left = sess.expiresAt - (Date.now() + offset);
+    const t = $('#pin-timer'); if (t) t.textContent = mmss(left);
+    if (left <= 0) { status('Code expired'); stopTick(); }
+  };
+  tick(); timer = setInterval(tick, 1000);
+}
+function stopTick() { clearInterval(timer); clearInterval(poll); timer = poll = null; }
+function resetSend(msg = '', keep = false) {
+  stopTick(); if (es) es.close(); es = null; closePeer(); sess = null; xhr = null;
+  if (!keep) picked = [];
+  $('#up-bar').style.width = '0'; $('#up-txt').textContent = '0%'; $('#up-speed').textContent = '';
+  show('#send-up', false); show('#send-pin', false); show('#send-pick', true);
+  renderPick(); $('#send-err').textContent = msg;
+}
+$('#pin-cancel').onclick = async () => {
+  if (sess && !sess.closed) await api('DELETE', sess.kind === 'direct' ? `/api/direct/${sess.pin}` : `/api/send/${sess.pin}`, null, { 'X-Token': sess.token }).catch(() => {});
+  resetSend();
+};
+$('#pin-new').onclick = () => {
+  if (sess && sess.kind === 'direct' && !sess.closed) api('DELETE', `/api/direct/${sess.pin}`, null, { 'X-Token': sess.token }).catch(() => {});
+  resetSend();
+};
+$('#copy-link').onclick = async () => {
+  const link = `${location.origin}${location.pathname}#${sess.pin}`;
+  try { await navigator.clipboard.writeText(link); $('#copy-link').textContent = 'Copied'; }
+  catch { $('#copy-link').textContent = link; }
+  setTimeout(() => $('#copy-link').textContent = 'Copy link', 2500);
+};
+
+/* ======================= RECEIVE ======================= */
+const pinIn = $('#pin'), rbtn = $('#recv-btn');
+let found = null, rx = null;
+
+function resetRecv() {
+  if (rx) rx.close();
+  found = null; rx = null;
+  show('#recv-files', false); show('#r-prog', false);
+  rbtn.textContent = 'Receive';
+}
+pinIn.addEventListener('input', () => {
+  pinIn.value = pinIn.value.replace(/\D/g, '').slice(0, 4);
+  $('#recv-err').textContent = '';
+  if (found && found.pin !== pinIn.value) resetRecv();
+  rbtn.disabled = pinIn.value.length !== 4;
+});
+pinIn.addEventListener('keydown', e => { if (e.key === 'Enter' && !rbtn.disabled) rbtn.click(); });
+
+rbtn.onclick = async () => {
+  if (found) return found.mode === 'direct' ? receiveDirect() : downloadStored();
+  const pin = pinIn.value;
+  rbtn.disabled = true; rbtn.textContent = 'Looking…';
+  let r;
+  try { r = await api('GET', `/api/recv/${pin}`); }
+  catch { $('#recv-err').textContent = 'Can’t reach the server'; rbtn.disabled = false; rbtn.textContent = 'Receive'; return; }
+  rbtn.disabled = false;
+  if (r.status === 429) { rbtn.textContent = 'Receive'; $('#recv-err').textContent = 'Too many wrong tries — wait a few minutes'; return; }
+  if (!r.ok) { rbtn.textContent = 'Receive'; $('#recv-err').textContent = 'Code not found or expired'; return; }
+  if (r.data.mode === 'direct' && r.data.busy) { rbtn.textContent = 'Receive'; $('#recv-err').textContent = 'Someone is already receiving this'; return; }
+  found = { pin, mode: r.data.mode, files: r.data.files };
+  const n = r.data.files.length;
+  if (r.data.mode === 'store') {
+    $('#recv-list').innerHTML = r.data.files.map((f, i) => fileRow(f, `<a class="dl" href="/api/recv/${pin}/${i}" download aria-label="Download">${icon('down')}</a>`)).join('');
+    $('#recv-exp').textContent = `Expires in ${mmss(r.data.expiresAt - r.data.now)}${r.data.oneTime ? ' · deleted after download' : ''}`;
+  } else {
+    $('#recv-list').innerHTML = r.data.files.map(f => fileRow(f, '')).join('');
+    $('#recv-exp').textContent = 'Sent straight from their device';
+  }
+  show('#recv-files', true);
+  rbtn.innerHTML = `${icon('down')}${n > 1 ? `Download all (${n})` : 'Download'}`;
+};
+function downloadStored() {
+  [...document.querySelectorAll('#recv-list a.dl')].forEach((a, i) => setTimeout(() => a.click(), i * 700));
+}
+function saveBlob(blob, name) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 120000);
+}
+function markRow(i, text) { const el = document.querySelectorAll('#recv-list .fsize')[i]; if (el) { el.textContent = text; el.classList.add('ok'); } }
+
+async function receiveDirect() {
+  const { pin, files } = found;
+  const total = sum(files), biggest = Math.max(...files.map(f => f.size));
+  // When the server itself is on the local network (localhost, 192.168.x.x, …), sending through it is
+  // several times faster than WebRTC, so skip P2P. On a public domain, P2P comes first.
+  const lan = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?$|.*\.local$)/.test(location.hostname);
+  let dir = null;
+  if (!lan && window.showDirectoryPicker && total > 512 * 1024 * 1024) {
+    try { dir = await window.showDirectoryPicker({ id: 'sendtoher', mode: 'readwrite' }); } catch { return; }
+  }
+  rbtn.disabled = true; rbtn.textContent = 'Connecting…'; $('#recv-err').textContent = '';
+  const st = {
+    pin, files, dir, rid: hex(16), mode: !lan && (dir || biggest <= MEM_LIMIT) ? 'p2p' : 'relay',
+    pc: null, ch: null, pending: [], q: Promise.resolve(), next: 0, cur: null, bytes: 0, relay: new Map(), relayDone: new Set(),
+    meter: meter(), done: false, timer: null, es: null, ice: [],
+    close() { clearTimeout(this.timer); if (this.es) this.es.close(); try { this.ch && this.ch.close(); } catch {} try { this.pc && this.pc.close(); } catch {} },
+  };
+  rx = st;
+  const sig = data => fetch(`/api/direct/${pin}/signal`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Rid': st.rid }, body: JSON.stringify({ data }) }).catch(() => {});
+  const fail = msg => { if (st.done) return; st.done = true; st.close(); $('#recv-err').textContent = msg; rbtn.disabled = false; rbtn.innerHTML = `${icon('down')}Try again`; };
+  const prog = throttle(() => { show('#r-prog', true); setProg('r', st.bytes, total, st.mode === 'p2p' ? 'Direct' : 'Via server', st.meter(st.bytes)); }, 150);
+  const complete = () => {
+    if (st.done) return; st.done = true;
+    sig({ type: 'complete' });
+    setProg('r', 1, 1, st.mode === 'p2p' ? 'Direct' : 'Via server', 0);
+    rbtn.innerHTML = 'Received ♥'; rbtn.disabled = true;
+    setTimeout(() => st.close(), 1500);
+  };
+  const startRelay = () => {
+    if (st.mode === 'relay' && st.relayStarted) return;
+    st.mode = 'relay'; st.relayStarted = true; st.bytes = 0;
+    try { st.pc && st.pc.close(); } catch {}
+    sig({ type: 'relay-start' });
+    rbtn.textContent = 'Downloading…'; prog();
+    files.forEach((f, i) => setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = `/api/direct/${pin}/relay/${i}?rid=${st.rid}`; a.download = f.name;
+      document.body.append(a); a.click(); a.remove();
+    }, i * 800));
+  };
+  const request = i => st.ch.send(JSON.stringify({ type: 'get', i }));
+  const flush = async () => { if (st.cur && st.cur.buf.length && st.cur.w) { await st.cur.w.write(new Blob(st.cur.buf)); st.cur.buf = []; st.cur.bufBytes = 0; } };
+  const onData = async data => {
+    if (typeof data === 'string') {
+      const m = JSON.parse(data);
+      if (m.type === 'file') {
+        const name = files[m.i].name;
+        st.cur = { i: m.i, name, buf: [], bufBytes: 0, chunks: [], w: null };
+        if (st.dir) st.cur.w = await (await st.dir.getFileHandle(name, { create: true })).createWritable();
+      } else if (m.type === 'eof') {
+        const c = st.cur;
+        if (c.w) { await flush(); await c.w.close(); } else saveBlob(new Blob(c.chunks), c.name);
+        markRow(c.i, 'Received'); st.cur = null;
+        if (++st.next < files.length) request(st.next); else complete();
+      }
+      return;
+    }
+    const c = st.cur; if (!c) return;
+    if (c.w) { c.buf.push(data); c.bufBytes += data.byteLength; if (c.bufBytes >= 4 * 1024 * 1024) await flush(); }
+    else c.chunks.push(data);
+    st.bytes += data.byteLength; prog();
+  };
+
+  st.es = new EventSource(`/api/direct/${pin}/events?rid=${st.rid}`);
+  st.es.onerror = () => { if (st.es.readyState === EventSource.CLOSED) fail('Lost connection to the server'); };
+  st.es.addEventListener('gone', () => fail('The sender closed the page'));
+  st.es.addEventListener('hello', e => {
+    st.ice = JSON.parse(e.data).ice || [];
+    if (st.started) return; st.started = true;
+    if (st.mode === 'relay') return startRelay();
+    st.timer = setTimeout(() => { if (!st.ch || st.ch.readyState !== 'open') startRelay(); }, P2P_TIMEOUT);
+  });
+  st.es.addEventListener('relay-progress', e => {
+    const d = JSON.parse(e.data);
+    st.relay.set(d.i, d.bytes); st.bytes = [...st.relay.values()].reduce((a, b) => a + b, 0); prog();
+    if (d.done) { st.relayDone.add(d.i); markRow(d.i, 'Received'); if (st.relayDone.size === files.length) complete(); }
+  });
+  st.es.addEventListener('signal', async e => {
+    const d = JSON.parse(e.data);
+    if (st.mode !== 'p2p') return;
+    try {
+      if (d.sdp) {
+        try { st.pc && st.pc.close(); } catch {}
+        st.pc = new RTCPeerConnection({ iceServers: st.ice });
+        st.pending = [];
+        st.pc.onicecandidate = ev => { if (ev.candidate) sig({ candidate: ev.candidate.toJSON() }); };
+        st.pc.ondatachannel = ev => {
+          const ch = ev.channel; ch.binaryType = 'arraybuffer'; st.ch = ch;
+          ch.onopen = () => { if (st.mode !== 'p2p') return; clearTimeout(st.timer); rbtn.textContent = 'Downloading…'; prog(); request(st.next); };
+          ch.onmessage = ev2 => {
+            // fast path: binary data kept in memory needs no waiting, so handle it right away
+            if (!st.dir && typeof ev2.data !== 'string' && st.cur && !st.busy) { st.cur.chunks.push(ev2.data); st.bytes += ev2.data.byteLength; prog(); return; }
+            st.busy = true;
+            st.q = st.q.then(() => onData(ev2.data)).then(() => { st.busy = false; }).catch(err => { st.busy = false; console.error(err); fail('Saving failed'); });
+          };
+          ch.onclose = () => { if (!st.done && st.mode === 'p2p') fail('Connection dropped — try again'); };
+        };
+        await st.pc.setRemoteDescription(d.sdp);
+        await st.pc.setLocalDescription(await st.pc.createAnswer());
+        sig({ sdp: st.pc.localDescription.toJSON() });
+        for (const c of st.pending.splice(0)) await st.pc.addIceCandidate(c).catch(() => {});
+      } else if (d.candidate && st.pc) {
+        if (st.pc.remoteDescription) await st.pc.addIceCandidate(d.candidate).catch(() => {}); else st.pending.push(d.candidate);
+      }
+    } catch (err) { console.error(err); startRelay(); }
+  });
+}
+
+/* ---- open from link #1234 ---- */
+const fromHash = () => {
+  const h = location.hash.slice(1);
+  if (/^\d{4}$/.test(h)) { pinIn.value = h; resetRecv(); rbtn.disabled = false; rbtn.click(); }
+};
+window.addEventListener('hashchange', fromHash);
+fromHash();
+}
+</script>
+</body>
+</html>
